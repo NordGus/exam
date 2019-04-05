@@ -39,6 +39,7 @@ func main() {
 
 	r.HandleFunc("/api/v1/hello", HelloChameleon)
 	r.HandleFunc("/api/v1/sum", Sum)
+	r.HandleFunc("/api/v1/sumdb", SumDB)
 
 	s := http.Server{
 		Addr:         addr,
@@ -66,8 +67,30 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros (a y b) como entrada y devuelve la suma de los mismos como salida
+// Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros (a y b) como entrada
+// y devuelve la suma de los mismos como salida
 func Sum(w http.ResponseWriter, r *http.Request) {
+	a, b, err := retrieveNumbers(r.URL.Query())
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Respondiendo con el resultado de la suma de los dos numeros
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	result := strconv.Itoa(a + b)
+	_, err = w.Write([]byte(result))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Opps!, algo salió mal. Error: %v", err), http.StatusInternalServerError)
+		return
+	}
+}
+
+// SumDB Escucha a la URL "/api/v1/sumdb" esperando dos numeros enteros (a y b) como entrada,
+// calcula la suma de los mismos, guarda ambos números y el resultado de la suma en la base de datos
+// y retorna la suma de todos los resultados en la base de datos
+func SumDB(w http.ResponseWriter, r *http.Request) {
 	a, b, err := retrieveNumbers(r.URL.Query())
 	if err != nil {
 		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
