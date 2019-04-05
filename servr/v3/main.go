@@ -58,7 +58,7 @@ func main() {
 
 // HelloChameleon sirve a la URL "/api/v1/hello" y retorna "Hello Chamalleon" como respuesta.
 func HelloChameleon(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte("Hello Chameleon"))
 	if err != nil {
@@ -75,7 +75,7 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	result := strconv.Itoa(a + b)
 	_, err = w.Write([]byte(result))
@@ -99,7 +99,7 @@ func SumDB(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	result := strconv.Itoa(total)
 	_, err = w.Write([]byte(result))
