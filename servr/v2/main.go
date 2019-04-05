@@ -67,15 +67,14 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// retrieveNumbers procesa los parametros de la url y devuelve los numeros a sumar o un error en caso de que algo salga mal
 func retrieveNumbers(values map[string][]string) (int, int, error) {
 	var numbers []int
-
 	if len(values) != 2 {
 		err := errors.New("no se recibieron los dos números enteros en la URL")
 		log.Println(err)
 		return 0, 0, err
 	}
-
 	for key, value := range values {
 		number, err := strconv.Atoi(value[0])
 		if err != nil {
@@ -85,6 +84,5 @@ func retrieveNumbers(values map[string][]string) (int, int, error) {
 		}
 		numbers = append(numbers, number)
 	}
-
 	return numbers[0], numbers[1], nil
 }
