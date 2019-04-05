@@ -18,32 +18,30 @@ const (
 var words []string
 
 func init() {
-	// Ignorando el primer elemento del slice que regresa os.Args,
-	// debido a que es el nombre del programa
 	words = os.Args[1:]
 }
 
 func main() {
-	// Retornando temprano en caso de que no hallan palabras que escribir al fichero
 	if len(words) == 0 {
-		log.Fatalln("No hay palabras que escribir al archivo")
+		log.Println("No hay palabras que escribir al archivo")
+		os.Exit(7)
 	}
 
-	// Creando fichero en el directorio /tmp en el cual se van a escribir las palabras
 	file, err := os.Create(filePath)
 	if err != nil {
-		log.Fatalf("A ocurrido un error al intentar crear el fichero <%s>. Error: %v", filePath, err)
+		log.Printf("A ocurrido un error al intentar crear el fichero <%s>. Error: %v\n", filePath, err)
+		os.Exit(7)
 	}
 	defer file.Close()
 
 	encoder := base64.NewEncoder(base64.StdEncoding, file)
 	defer encoder.Close()
 
-	// Procesando el listado de palabras recibidas
 	for i, w := range words {
-		// Las palabras impares para el usuario tienen posiciones pares en slice
+		// Las palabras impares para el usuario tienen posiciones pares en slice de argumentos
 		if i%2 == 0 {
-			_, err := encoder.Write([]byte(fmt.Sprint(w, "\n")))
+			input := fmt.Sprint(w, "\n")
+			_, err := encoder.Write([]byte(input))
 			if err != nil {
 				log.Fatalf("A ocurrido un error al intentar escribir la palabra %s al fichero %s. Error: %v", w, file.Name(), err)
 			}
