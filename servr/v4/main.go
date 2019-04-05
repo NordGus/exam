@@ -35,10 +35,10 @@ func main() {
 
 	r := http.NewServeMux()
 
-	r.HandleFunc("/api/v1/hello", HelloChameleon)
-	r.HandleFunc("/api/v1/sum", Sum)
-	r.HandleFunc("/api/v1/sumdb", SumDB)
-	r.HandleFunc("/api/v1/reset", Reset)
+	r.HandleFunc("/api/v1/hello", LogIncomingRequest(HelloChameleon))
+	r.HandleFunc("/api/v1/sum", LogIncomingRequest(Sum))
+	r.HandleFunc("/api/v1/sumdb", LogIncomingRequest(SumDB))
+	r.HandleFunc("/api/v1/reset", LogIncomingRequest(Reset))
 
 	s := http.Server{
 		Addr:         addr,
@@ -129,6 +129,14 @@ func Reset(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Número de operaciones borradas:", affected)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// LogIncomingRequest logs incoming request
+func LogIncomingRequest(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%v | [%v] %v - %v \n", r.Proto, r.RemoteAddr, r.Method, r.RequestURI)
+		f(w, r)
+	}
 }
 
 // retrieveNumbers procesa los parametros de la url y devuelve los numeros a sumar o un error en caso de que algo falle
