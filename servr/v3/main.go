@@ -67,7 +67,7 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros (a y b) como entrada
+// Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros, "a" y "b", como entrada
 // y devuelve la suma de los mismos como salida.
 func Sum(w http.ResponseWriter, r *http.Request) {
 	a, b, err := retrieveNumbers(r.URL.Query())
@@ -85,7 +85,7 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SumDB Escucha a la URL "/api/v1/sumdb" esperando dos numeros enteros (a y b) como entrada,
+// SumDB Escucha a la URL "/api/v1/sumdb" esperando dos numeros enteros, "a" y "b", como entrada,
 // calcula la suma de los mismos, guarda ambos números y el resultado de la suma en la base de datos
 // y retorna el número de resultados en la base de datos.
 func SumDB(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +109,7 @@ func SumDB(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// retrieveNumbers procesa los parametros de la url y devuelve los numeros a sumar o un error en caso de que algo salga mal
+// retrieveNumbers procesa los parametros de la url y devuelve los numeros a sumar o un error en caso de que algo falle
 func retrieveNumbers(values map[string][]string) (int, int, error) {
 	var numbers []int
 	if len(values) != 2 {
@@ -140,6 +140,9 @@ func createSumTableIfDoesntExist() error {
 	return nil
 }
 
+// registerSumInDB toma dos números enteros, "a" y "b", calcula la suma de los mismos,
+// guarda ambos números y el resultado de la suma en la base de datos,
+// calcula el número de resultados en la base de datos y lo retorna o un error en caso de que algo falle
 func registerSumInDB(a, b int) (int, error) {
 	db, err := sql.Open(driver, dbname)
 	if err != nil {
