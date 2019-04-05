@@ -50,11 +50,12 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 
 // Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros (a y b) como entrada y devuelve la suma de los mismos como salida
 func Sum(w http.ResponseWriter, r *http.Request) {
-	a, b, err := retrieveNumbers(r)
+	a, b, err := retrieveNumbers(r.URL.Query())
 	if err != nil {
 		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
 		return
 	}
+
 	// Respondiendo con el resultado de la suma de los dos numeros
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
@@ -66,28 +67,24 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func retrieveNumbers(r *http.Request) (int, int, error) {
-	ua, ok := r.URL.Query()["a"]
-	pca := ok
-	ub, ok := r.URL.Query()["b"]
-	pcb := ok
-	if !pca || !pcb {
-		err := errors.New("no se recibieron los dos números enteros \"a\" y \"b\"")
+func retrieveNumbers(values map[string][]string) (int, int, error) {
+	var numbers []int
+
+	if len(values) != 2 {
+		err := errors.New("no se recibieron los dos números enteros en la URL")
 		log.Println(err)
 		return 0, 0, err
 	}
 
-	a, err := strconv.Atoi(ua[0])
-	if err != nil {
-		err := fmt.Errorf("\"%v\" no es un valor válido para \"a\"", ua[0])
-		log.Println(err)
-		return 0, 0, err
+	for key, value := range values {
+		number, err := strconv.Atoi(value[0])
+		if err != nil {
+			err := fmt.Errorf("\"%v\" no es un valor válido para \"%v\"", value[0], key)
+			log.Println(err)
+			return 0, 0, err
+		}
+		numbers = append(numbers, number)
 	}
-	b, err := strconv.Atoi(ub[0])
-	if err != nil {
-		err := fmt.Errorf("\"%v\" no es un valor válido para \"b\"", ub[0])
-		log.Println(err)
-		return 0, 0, err
-	}
-	return a, b, nil
+
+	return numbers[0], numbers[1], nil
 }
