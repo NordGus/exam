@@ -56,7 +56,7 @@ func main() {
 	}
 }
 
-// HelloChameleon sirve a la URL "/api/v1/hello" y retorna "Hello Chamalleon" como respuesta
+// HelloChameleon sirve a la URL "/api/v1/hello" y retorna "Hello Chamalleon" como respuesta.
 func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
@@ -68,15 +68,13 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 }
 
 // Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros (a y b) como entrada
-// y devuelve la suma de los mismos como salida
+// y devuelve la suma de los mismos como salida.
 func Sum(w http.ResponseWriter, r *http.Request) {
 	a, b, err := retrieveNumbers(r.URL.Query())
 	if err != nil {
 		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
 		return
 	}
-
-	// Respondiendo con el resultado de la suma de los dos numeros
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	result := strconv.Itoa(a + b)
@@ -89,7 +87,7 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 
 // SumDB Escucha a la URL "/api/v1/sumdb" esperando dos numeros enteros (a y b) como entrada,
 // calcula la suma de los mismos, guarda ambos números y el resultado de la suma en la base de datos
-// y retorna la suma de todos los resultados en la base de datos
+// y retorna el número de resultados en la base de datos.
 func SumDB(w http.ResponseWriter, r *http.Request) {
 	a, b, err := retrieveNumbers(r.URL.Query())
 	if err != nil {
@@ -97,10 +95,44 @@ func SumDB(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respondiendo con el resultado de la suma de los dos numeros
+	db, err := sql.Open(driver, dbname)
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+	insert, err := db.Prepare("INSERT INTO sums(first_number, second_number, total) VALUES (?, ?, ?);")
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+	defer insert.Close()
+	_, err = insert.Exec(a, b, (a + b))
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+	count, err := db.Query("SELECT COUNT(total) FROM sums;")
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+	defer count.Close()
+
+	var total int
+
+	for count.Next() {
+		err = count.Scan(&total)
+		if err != nil {
+			http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+			return
+		}
+		break
+	}
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	result := strconv.Itoa(a + b)
+	result := strconv.Itoa(total)
 	_, err = w.Write([]byte(result))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Opps!, algo salió mal. Error: %v", err), http.StatusInternalServerError)
@@ -135,19 +167,10 @@ func CreateSumTableIfDoesntExist() error {
 	if err != nil {
 		return err
 	}
-
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS sums (
-			id INTEGER PRIMARY KEY AUTOINCREMENT, 
-			first_number INTEGER NOT NULL, 
-			second_number INTEGER NOT NULL, 
-			total INTEGER NOT NULL
-		);
-	`)
-
+	defer db.Close()
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS sums (id INTEGER PRIMARY KEY AUTOINCREMENT, first_number INTEGER NOT NULL, second_number INTEGER NOT NULL, total INTEGER NOT NULL);`)
 	if err != nil {
 		return err
 	}
-	db.Close()
 	return nil
 }
