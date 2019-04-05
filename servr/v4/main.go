@@ -38,6 +38,7 @@ func main() {
 	r.HandleFunc("/api/v1/hello", HelloChameleon)
 	r.HandleFunc("/api/v1/sum", Sum)
 	r.HandleFunc("/api/v1/sumdb", SumDB)
+	r.HandleFunc("/api/v1/reset", Reset)
 
 	s := http.Server{
 		Addr:         addr,
@@ -54,7 +55,7 @@ func main() {
 	}
 }
 
-// HelloChameleon sirve a la URL "/api/v1/hello" y retorna "Hello Chamalleon" como respuesta.
+// HelloChameleon escucha a la URL "/api/v1/hello" y retorna "Hello Chamalleon" como respuesta.
 func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
@@ -65,7 +66,7 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros, "a" y "b", como entrada
+// Sum escucha a la URL "/api/v1/sum" esperando dos numeros enteros, "a" y "b", como entrada
 // y devuelve la suma de los mismos como salida.
 func Sum(w http.ResponseWriter, r *http.Request) {
 	a, b, err := retrieveNumbers(r.URL.Query())
@@ -83,7 +84,7 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SumDB Escucha a la URL "/api/v1/sumdb" esperando dos numeros enteros, "a" y "b", como entrada,
+// SumDB escucha a la URL "/api/v1/sumdb" esperando dos numeros enteros, "a" y "b", como entrada,
 // calcula la suma de los mismos, guarda ambos números y el resultado de la suma en la base de datos
 // y retorna el número de resultados en la base de datos.
 func SumDB(w http.ResponseWriter, r *http.Request) {
@@ -105,6 +106,29 @@ func SumDB(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Opps!, algo salió mal. Error: %v", err), http.StatusInternalServerError)
 		return
 	}
+}
+
+// Reset escucha a la URL "/api/v1/reset" borra todos los registros de sumas y sus resultados
+// de la base de datos y no devuelve contenido.
+func Reset(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open(driver, dbname)
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+	result, err := db.Exec("DELETE FROM sums;")
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
+		return
+	}
+	log.Println("Número de operaciones borradas:", affected)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // retrieveNumbers procesa los parametros de la url y devuelve los numeros a sumar o un error en caso de que algo falle
