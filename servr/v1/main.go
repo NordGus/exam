@@ -17,7 +17,7 @@ func main() {
 
 	r := http.NewServeMux()
 
-	r.HandleFunc("/api/v1/hello", HelloChameleon)
+	r.HandleFunc("/api/v1/hello", LogIncomingRequest(HelloChameleon))
 
 	s := http.Server{
 		Addr:         addr,
@@ -42,5 +42,13 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Opps!, algo salió mal. Error: %v", err), http.StatusInternalServerError)
 		return
+	}
+}
+
+// LogIncomingRequest logs incoming request
+func LogIncomingRequest(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%v | [%v] %v - %v \n", r.Proto, r.RemoteAddr, r.Method, r.RequestURI)
+		f(w, r)
 	}
 }
