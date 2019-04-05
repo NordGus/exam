@@ -113,16 +113,12 @@ func SumDB(w http.ResponseWriter, r *http.Request) {
 func retrieveNumbers(values map[string][]string) (int, int, error) {
 	var numbers []int
 	if len(values) != 2 {
-		err := errors.New("no se recibieron los dos números enteros en la URL")
-		log.Println(err)
-		return 0, 0, err
+		return 0, 0, errors.New("no se recibieron los dos números enteros en la URL")
 	}
 	for key, value := range values {
 		number, err := strconv.Atoi(value[0])
 		if err != nil {
-			err := fmt.Errorf("\"%v\" no es un valor válido para \"%v\"", value[0], key)
-			log.Println(err)
-			return 0, 0, err
+			return 0, 0, fmt.Errorf("\"%v\" no es un valor válido para \"%v\"", value[0], key)
 		}
 		numbers = append(numbers, number)
 	}
