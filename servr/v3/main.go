@@ -7,6 +7,7 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -24,7 +25,11 @@ const (
 )
 
 func init() {
-
+	err := CreateSumTableIfDoesntExist()
+	if err != nil {
+		log.Println(err)
+		os.Exit(7)
+	}
 }
 
 func main() {
@@ -98,4 +103,28 @@ func retrieveNumbers(values map[string][]string) (int, int, error) {
 		numbers = append(numbers, number)
 	}
 	return numbers[0], numbers[1], nil
+}
+
+// CreateSumTableIfDoesntExist es una función para que en el momento de la inicialización del programa
+// que revisa si exista la base de datos y la tabla necesaria dentro de ella
+func CreateSumTableIfDoesntExist() error {
+	db, err := sql.Open(driver, dbname)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS sums (
+			id INTEGER PRIMARY KEY AUTOINCREMENT, 
+			first_number INTEGER NOT NULL, 
+			second_number INTEGER NOT NULL, 
+			total INTEGER NOT NULL
+		);
+	`)
+
+	if err != nil {
+		return err
+	}
+	db.Close()
+	return nil
 }
