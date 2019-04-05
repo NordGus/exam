@@ -19,8 +19,8 @@ func main() {
 
 	r := http.NewServeMux()
 
-	r.HandleFunc("/api/v1/hello", LogIncomingRequest(HelloChameleon))
-	r.HandleFunc("/api/v1/sum", LogIncomingRequest(Sum))
+	r.HandleFunc("/api/v1/hello", RequestLogger(HelloChameleon))
+	r.HandleFunc("/api/v1/sum", RequestLogger(Sum))
 
 	s := http.Server{
 		Addr:         addr,
@@ -67,11 +67,13 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// LogIncomingRequest logs incoming request
-func LogIncomingRequest(f http.HandlerFunc) http.HandlerFunc {
+// RequestLogger logs incoming request
+func RequestLogger(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		started := time.Now()
 		log.Printf("%v | [%v] %v - %v \n", r.Proto, r.RemoteAddr, r.Method, r.RequestURI)
 		f(w, r)
+		log.Printf("[%v] request processed in %s\n", r.RemoteAddr, time.Now().Sub(started))
 	}
 }
 
