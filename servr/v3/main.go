@@ -25,7 +25,7 @@ const (
 )
 
 func init() {
-	err := CreateSumTableIfDoesntExist()
+	err := createSumTableIfDoesntExist()
 	if err != nil {
 		log.Println(err)
 		os.Exit(7)
@@ -94,42 +94,11 @@ func SumDB(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
 		return
 	}
-
-	db, err := sql.Open(driver, dbname)
+	total, err := registerSumInDB(a, b)
 	if err != nil {
 		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
 		return
 	}
-	defer db.Close()
-	insert, err := db.Prepare("INSERT INTO sums(first_number, second_number, total) VALUES (?, ?, ?);")
-	if err != nil {
-		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
-		return
-	}
-	defer insert.Close()
-	_, err = insert.Exec(a, b, (a + b))
-	if err != nil {
-		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
-		return
-	}
-	count, err := db.Query("SELECT COUNT(total) FROM sums;")
-	if err != nil {
-		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
-		return
-	}
-	defer count.Close()
-
-	var total int
-
-	for count.Next() {
-		err = count.Scan(&total)
-		if err != nil {
-			http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
-			return
-		}
-		break
-	}
-
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	result := strconv.Itoa(total)
@@ -162,7 +131,7 @@ func retrieveNumbers(values map[string][]string) (int, int, error) {
 
 // CreateSumTableIfDoesntExist es una función para que en el momento de la inicialización del programa
 // que revisa si exista la base de datos y la tabla necesaria dentro de ella
-func CreateSumTableIfDoesntExist() error {
+func createSumTableIfDoesntExist() error {
 	db, err := sql.Open(driver, dbname)
 	if err != nil {
 		return err
@@ -173,4 +142,38 @@ func CreateSumTableIfDoesntExist() error {
 		return err
 	}
 	return nil
+}
+
+func registerSumInDB(a, b int) (int, error) {
+	db, err := sql.Open(driver, dbname)
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+	insert, err := db.Prepare("INSERT INTO sums(first_number, second_number, total) VALUES (?, ?, ?);")
+	if err != nil {
+		return 0, err
+	}
+	defer insert.Close()
+	_, err = insert.Exec(a, b, (a + b))
+	if err != nil {
+		return 0, err
+	}
+	count, err := db.Query("SELECT COUNT(total) FROM sums;")
+	if err != nil {
+		return 0, err
+	}
+	defer count.Close()
+	var total int
+	for count.Next() {
+		err = count.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+		break
+	}
+	db.Close()
+	insert.Close()
+	count.Close()
+	return total, nil
 }
