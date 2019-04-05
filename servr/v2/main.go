@@ -5,6 +5,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -49,27 +50,11 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 
 // Sum Escucha a la URL "/api/v1/sum" esperando dos numeros enteros (a y b) como entrada y devuelve la suma de los mismos como salida
 func Sum(w http.ResponseWriter, r *http.Request) {
-
-	ua, ok := r.URL.Query()["a"]
-	ub, ok := r.URL.Query()["b"]
-	if !ok {
-		http.Error(w, "Opps!, algo salió mal. Error: No se recibieron los dos números enteros \"a\" y \"b\"", http.StatusInternalServerError)
-		log.Println("No se recibieron los dos números enteros \"a\" y \"b\"")
-		return
-	}
-	a, err := strconv.Atoi(ua[0])
+	a, b, err := retrieveNumbers(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Opps!, algo salió mal, Error: Valor de \"%v\" no válido para \"a\".", ua[0]), http.StatusInternalServerError)
-		log.Println(err)
+		http.Error(w, fmt.Sprint("Opps algo salió mal. Error: ", err), http.StatusInternalServerError)
 		return
 	}
-	b, err := strconv.Atoi(ub[0])
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Opps!, algo salió mal, Error: Valor de \"%v\" no válido para \"a\".", ua[0]), http.StatusInternalServerError)
-		log.Println(err)
-		return
-	}
-
 	// Respondiendo con el resultado de la suma de los dos numeros
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
@@ -79,4 +64,30 @@ func Sum(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Opps!, algo salió mal. Error: %v", err), http.StatusInternalServerError)
 		return
 	}
+}
+
+func retrieveNumbers(r *http.Request) (int, int, error) {
+	ua, ok := r.URL.Query()["a"]
+	pca := ok
+	ub, ok := r.URL.Query()["b"]
+	pcb := ok
+	if !pca || !pcb {
+		err := errors.New("no se recibieron los dos números enteros \"a\" y \"b\"")
+		log.Println(err)
+		return 0, 0, err
+	}
+
+	a, err := strconv.Atoi(ua[0])
+	if err != nil {
+		err := fmt.Errorf("\"%v\" no es un valor válido para \"a\"", ua[0])
+		log.Println(err)
+		return 0, 0, err
+	}
+	b, err := strconv.Atoi(ub[0])
+	if err != nil {
+		err := fmt.Errorf("\"%v\" no es un valor válido para \"b\"", ub[0])
+		log.Println(err)
+		return 0, 0, err
+	}
+	return a, b, nil
 }
