@@ -6,21 +6,19 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
 )
 
-func init() {
-	lf, err := os.Create(fmt.Sprintf("%s.log", time.Now().Format("20060102150405")))
+func main() {
+	lf, err := os.OpenFile("logrestfile.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("A ocurrido un error al intentar crear el fichero de log")
 	}
+	defer lf.Close()
 	log.SetOutput(lf)
-}
 
-func main() {
 	m := Matriz{
 		{-5.0, 4.6, -0.5},
 		{7.6, -9.3, 1.2},
