@@ -19,8 +19,10 @@ import (
 )
 
 const (
-	dbname = "./servr.db"
-	driver = "sqlite3"
+	dbname   = "./servr.db"
+	driver   = "sqlite3"
+	certFile = "./certs/app.crt" // Certificados propios para pruebas
+	certKey  = "./certs/app.key" // Certificados propios para pruebas
 )
 
 func init() {
@@ -43,7 +45,7 @@ func main() {
 
 	s := NewServer(addr, r)
 
-	err := s.ListenAndServe()
+	err := s.ListenAndServeTLS(certFile, certKey)
 
 	if err != nil {
 		log.Println(err)
@@ -52,7 +54,7 @@ func main() {
 }
 
 // NewServer crea y configura el servidor para servir la applicaion a la web
-func NewServer(addr string, mux *http.ServeMux) *http.Server {
+func NewServer(serverAddress string, mux *http.ServeMux) *http.Server {
 	tlsConfig := &tls.Config{
 		PreferServerCipherSuites: true,
 		CurvePreferences: []tls.CurveID{
@@ -71,12 +73,13 @@ func NewServer(addr string, mux *http.ServeMux) *http.Server {
 	}
 
 	return &http.Server{
-		Addr:         addr,
+		Addr:         serverAddress,
 		Handler:      mux,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
 		TLSConfig:    tlsConfig,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 	}
 }
 
