@@ -15,15 +15,10 @@ const (
 	filePath = "/tmp/listr64.txt"
 )
 
-var words []string
-var logger *log.Logger
-
-func init() {
-	words = os.Args[1:] // Ignorando el primer elemento del slice que regresa os.Args puesto que es el nombre del programa
-	logger = log.New(os.Stdout, "lister64 ", log.LstdFlags|log.Lshortfile)
-}
-
 func main() {
+	words := os.Args[1:] // Ignorando el primer elemento del slice que regresa os.Args puesto que es el nombre del programa
+	logger := log.New(os.Stdout, "lister64 ", log.LstdFlags|log.Lshortfile)
+
 	if len(words) == 0 {
 		logger.Println("No hay palabras que escribir al archivo")
 		os.Exit(7)
@@ -40,8 +35,7 @@ func main() {
 	defer encoder.Close()
 
 	for i, w := range words {
-		// Las palabras impares para el usuario tienen posiciones pares en slice de argumentos
-		if i%2 == 0 {
+		if i%2 == 0 { // Las palabras impares para el usuario tienen posiciones pares en slice de argumentos
 			input := fmt.Sprint(w, "\n")
 			_, err := encoder.Write([]byte(input))
 			if err != nil {
