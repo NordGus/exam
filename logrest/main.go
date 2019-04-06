@@ -28,7 +28,8 @@ func (m Matriz) Subtraction() float64 {
 func main() {
 	lf, err := os.OpenFile("logrestfile.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatalln("A ocurrido un error al intentar crear el fichero de log")
+		log.Println("A ocurrido un error al intentar crear el fichero de log")
+		os.Exit(7)
 	}
 	defer lf.Close()
 	log.SetOutput(lf)
