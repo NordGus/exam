@@ -5,6 +5,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -40,18 +41,42 @@ func main() {
 	r.HandleFunc("/api/v1/sumdb", RequestLogger(SumDB))
 	r.HandleFunc("/api/v1/reset", RequestLogger(Reset))
 
-	s := http.Server{
-		Addr:         addr,
-		Handler:      r,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
+	s := NewServer(addr, r)
 
 	err := s.ListenAndServe()
 
 	if err != nil {
 		log.Println(err)
 		os.Exit(7)
+	}
+}
+
+// NewServer crea y configura el servidor para servir la applicaion a la web
+func NewServer(addr string, mux *http.ServeMux) *http.Server {
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences: []tls.CurveID{
+			tls.CurveP256,
+			tls.X25519,
+		},
+		MinVersion: tls.VersionTLS12,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		},
+	}
+
+	return &http.Server{
+		Addr:         addr,
+		Handler:      mux,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		TLSConfig:    tlsConfig,
 	}
 }
 
