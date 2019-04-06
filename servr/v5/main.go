@@ -55,6 +55,7 @@ func main() {
 
 // NewServer crea y configura el servidor para servir la applicaion a la web
 func NewServer(serverAddress string, mux *http.ServeMux) *http.Server {
+	// Blog de Cloudflare con la explicación del porque estas configuraciones: https://blog.cloudflare.com/exposing-go-on-the-internet/
 	tlsConfig := &tls.Config{
 		PreferServerCipherSuites: true,
 		CurvePreferences: []tls.CurveID{
@@ -79,7 +80,6 @@ func NewServer(serverAddress string, mux *http.ServeMux) *http.Server {
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
 		TLSConfig:    tlsConfig,
-		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 	}
 }
 
