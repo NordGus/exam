@@ -26,13 +26,14 @@ func (m Matriz) Subtraction() float64 {
 }
 
 func main() {
+	logger := log.New(os.Stdout, "logrest ", log.LstdFlags|log.Lshortfile)
 	lf, err := os.OpenFile("logrestfile.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Println("A ocurrido un error al intentar crear el fichero de log")
+		logger.Println("A ocurrido un error al intentar crear el fichero de log")
 		os.Exit(7)
 	}
 	defer lf.Close()
-	log.SetOutput(lf)
+	logger.SetOutput(lf)
 
 	m := Matriz{
 		{-5.0, 4.6, -0.5},
@@ -40,5 +41,5 @@ func main() {
 		{-8.3, -4.1, 0.6},
 	}
 	r := m.Subtraction()
-	log.Printf("%s,%s,%v\n", "resta", time.Now().Format("2006-01-02,15:04"), r)
+	logger.Printf("%s,%s,%v\n", "resta", time.Now().Format("2006-01-02,15:04"), r)
 }
