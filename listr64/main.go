@@ -16,20 +16,22 @@ const (
 )
 
 var words []string
+var logger *log.Logger
 
 func init() {
-	words = os.Args[1:]
+	words = os.Args[1:] // Ignorando el primer elemento del slice que regresa os.Args puesto que es el nombre del programa
+	logger = log.New(os.Stdout, "lister64 ", log.LstdFlags|log.Lshortfile)
 }
 
 func main() {
 	if len(words) == 0 {
-		log.Println("No hay palabras que escribir al archivo")
+		logger.Println("No hay palabras que escribir al archivo")
 		os.Exit(7)
 	}
 
 	file, err := os.Create(filePath)
 	if err != nil {
-		log.Printf("A ocurrido un error al intentar crear el fichero <%s>. Error: %v\n", filePath, err)
+		logger.Printf("A ocurrido un error al intentar crear el fichero <%s>. Error: %v\n", filePath, err)
 		os.Exit(7)
 	}
 	defer file.Close()
@@ -43,7 +45,7 @@ func main() {
 			input := fmt.Sprint(w, "\n")
 			_, err := encoder.Write([]byte(input))
 			if err != nil {
-				log.Printf("A ocurrido un error al intentar escribir la palabra %s al fichero %s. Error: %v\n", w, file.Name(), err)
+				logger.Printf("A ocurrido un error al intentar escribir la palabra %s al fichero %s. Error: %v\n", w, file.Name(), err)
 				os.Exit(7)
 			}
 		}
