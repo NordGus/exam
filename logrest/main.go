@@ -51,10 +51,11 @@ func generateRandomMatrix() Matriz {
 	for i, row := range m {
 		for j := range row {
 			rand.Seed(time.Now().UnixNano())
-			if rand.Intn(100) >= 50 {
-				m[i][j] = rand.Float64()
+			mlt := rand.Intn(10)
+			if mlt >= 5 {
+				m[i][j] = rand.Float64() * float64(mlt)
 			} else {
-				m[i][j] = -rand.Float64()
+				m[i][j] = -rand.Float64() * float64(mlt)
 			}
 		}
 	}
