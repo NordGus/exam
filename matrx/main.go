@@ -11,7 +11,7 @@ import (
 )
 
 // Matriz es un tipo alias que represanta una matriz de 3x3 en memoria
-type Matriz [3][3]float64
+type Matriz [3][3]int
 
 // Transposed es un metodo que retorna la Matriz transpuesta de una Matriz dada
 func (m Matriz) Transposed() Matriz {
@@ -25,8 +25,8 @@ func (m Matriz) Transposed() Matriz {
 }
 
 // Sum es un metodo que retorna la suma de todo los elementos de una Matriz dada
-func (m Matriz) Sum() float64 {
-	var t float64
+func (m Matriz) Sum() int {
+	var t int
 	for _, row := range m {
 		for _, value := range row {
 			t += value
@@ -48,17 +48,12 @@ func main() {
 
 func generateRandomMatrix() Matriz {
 	var m Matriz
-	var rf float64
+	min := -10
+	max := 10
 	for i, row := range m {
 		for j := range row {
 			rand.Seed(time.Now().UnixNano())
-			ri := rand.Intn(10)
-			if ri >= 5 {
-				rf = float64(ri)
-			} else {
-				rf = -float64(ri)
-			}
-			m[i][j] = rand.Float64() * rf
+			m[i][j] = rand.Intn(max-min) + min
 		}
 	}
 	return m
