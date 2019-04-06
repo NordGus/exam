@@ -48,15 +48,17 @@ func main() {
 
 func generateRandomMatrix() Matriz {
 	var m Matriz
+	var rf float64
 	for i, row := range m {
 		for j := range row {
 			rand.Seed(time.Now().UnixNano())
-			mlt := rand.Intn(10)
-			if mlt >= 5 {
-				m[i][j] = rand.Float64() * float64(mlt)
+			ri := rand.Intn(10)
+			if ri >= 5 {
+				rf = float64(ri)
 			} else {
-				m[i][j] = -rand.Float64() * float64(mlt)
+				rf = -float64(ri)
 			}
+			m[i][j] = rand.Float64() * rf
 		}
 	}
 	return m
