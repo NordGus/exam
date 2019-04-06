@@ -6,6 +6,8 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 // Matriz es un tipo alias que represanta una matriz de 3x3 en memoria
@@ -34,11 +36,7 @@ func (m Matriz) Sum() float64 {
 }
 
 func main() {
-	m := Matriz{
-		{1.0, 2.0, 3.0},
-		{4.0, 5.0, 6.0},
-		{7.0, 8.0, 9.0},
-	}
+	m := generateRandomMatrix()
 
 	t := m.Transposed()
 	sm := m.Sum()
@@ -46,4 +44,22 @@ func main() {
 	fmt.Println("Matriz:", m)
 	fmt.Println("Transpuesta de la Matriz:", t)
 	fmt.Println("Suma de todos los valores de la matriz:", sm)
+}
+
+func generateRandomMatrix() Matriz {
+	var m Matriz
+	var rf float64
+	for i, row := range m {
+		for j := range row {
+			rand.Seed(time.Now().UnixNano())
+			ri := rand.Intn(10)
+			if ri >= 5 {
+				rf = float64(ri)
+			} else {
+				rf = -float64(ri)
+			}
+			m[i][j] = rand.Float64() * rf
+		}
+	}
+	return m
 }
