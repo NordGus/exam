@@ -4,7 +4,9 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Matriz es un tipo alias que represanta una matriz de 3x3 en memoria
 type Matriz [3][3]float64
