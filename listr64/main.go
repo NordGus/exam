@@ -43,7 +43,8 @@ func main() {
 			input := fmt.Sprint(w, "\n")
 			_, err := encoder.Write([]byte(input))
 			if err != nil {
-				log.Fatalf("A ocurrido un error al intentar escribir la palabra %s al fichero %s. Error: %v", w, file.Name(), err)
+				log.Printf("A ocurrido un error al intentar escribir la palabra %s al fichero %s. Error: %v\n", w, file.Name(), err)
+				os.Exit(7)
 			}
 		}
 	}
