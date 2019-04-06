@@ -137,7 +137,7 @@ func RequestLogger(f http.HandlerFunc) http.HandlerFunc {
 		started := time.Now()
 		log.Printf("%v | [%v] %v - %v \n", r.Proto, r.RemoteAddr, r.Method, r.RequestURI)
 		f(w, r)
-		log.Printf("[%v] request processed in %s\n", r.RemoteAddr, time.Now().Sub(started))
+		log.Printf("%v | [%v] %v - %v: request processed in %s\n", r.Proto, r.RemoteAddr, r.Method, r.RequestURI, time.Now().Sub(started))
 	}
 }
 
