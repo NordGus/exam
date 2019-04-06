@@ -6,7 +6,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"time"
 )
@@ -29,17 +31,37 @@ func main() {
 	logger := log.New(os.Stdout, "logrest ", log.LstdFlags|log.Lshortfile)
 	lf, err := os.OpenFile("logrestfile.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		logger.Println("A ocurrido un error al intentar crear el fichero de log")
+		logger.Println(err)
 		os.Exit(7)
 	}
 	defer lf.Close()
-	logger.SetOutput(lf)
 
-	m := Matriz{
-		{-5.0, 4.6, -0.5},
-		{7.6, -9.3, 1.2},
-		{-8.3, -4.1, 0.6},
-	}
+	m := generateRandomMatrix()
 	r := m.Subtraction()
-	logger.Printf("%s,%s,%v\n", "resta", time.Now().Format("2006-01-02,15:04"), r)
+
+	err = writeToLogFile(r, lf)
+	if err != nil {
+		logger.Println(err)
+		os.Exit(7)
+	}
+}
+
+func generateRandomMatrix() Matriz {
+	var m Matriz
+	for i, row := range m {
+		for j := range row {
+			rand.Seed(time.Now().UnixNano())
+			if rand.Intn(100) >= 50 {
+				m[i][j] = rand.Float64()
+			} else {
+				m[i][j] = -rand.Float64()
+			}
+		}
+	}
+	return m
+}
+
+func writeToLogFile(result float64, logfile *os.File) error {
+	_, err := logfile.Write([]byte(fmt.Sprintf("%s,%s,%v\n", "resta", time.Now().Format("2006-01-02,15:04"), result)))
+	return err
 }
