@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -34,8 +35,7 @@ func init() {
 }
 
 func main() {
-	servrport := os.Getenv("SERVR_PORT")
-	addr := fmt.Sprintf(":%v", servrport)
+	addr := ":443"
 
 	r := http.NewServeMux()
 
@@ -46,6 +46,7 @@ func main() {
 
 	s := NewServer(addr, r)
 
+	go http.ListenAndServe(":80", http.HandlerFunc(redirectHTTP))
 	err := s.ListenAndServeTLS(certFile, certKey)
 
 	if err != nil {
@@ -237,4 +238,10 @@ func registerSumInDB(a, b int) (int, error) {
 	insert.Close()
 	count.Close()
 	return total, nil
+}
+
+func redirectHTTP(w http.ResponseWriter, r *http.Request) {
+	link := url.URL{Scheme: "https", Host: r.Host + ":443", Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+	log.Println(link)
+	http.Redirect(w, r, link.String(), http.StatusMovedPermanently)
 }
