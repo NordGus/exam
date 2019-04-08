@@ -25,20 +25,16 @@ const (
 	certKey  = "./certs/app.key" // Certificados propios para pruebas
 )
 
-var servrport = os.Getenv("SERVR_PORT")
-
 func init() {
 	err := createSumTableIfDoesntExist()
 	if err != nil {
 		log.Println(err)
 		os.Exit(7)
 	}
-	if servrport == "" {
-		servrport = "8080"
-	}
 }
 
 func main() {
+	servrport := os.Getenv("SERVR_PORT")
 	addr := fmt.Sprintf(":%v", servrport)
 
 	r := http.NewServeMux()
