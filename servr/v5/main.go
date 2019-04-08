@@ -25,23 +25,28 @@ const (
 	certKey  = "./certs/app.key" // Certificados propios para pruebas
 )
 
+var servrport = os.Getenv("SERVR_PORT")
+
 func init() {
 	err := createSumTableIfDoesntExist()
 	if err != nil {
 		log.Println(err)
 		os.Exit(7)
 	}
+	if servrport == "" {
+		servrport = "8080"
+	}
 }
 
 func main() {
-	addr := fmt.Sprintf(":%v", 8080)
+	addr := fmt.Sprintf(":%v", servrport)
 
 	r := http.NewServeMux()
 
-	r.HandleFunc("/api/v1/hello", RequestLogger(HelloChameleon))
-	r.HandleFunc("/api/v1/sum", RequestLogger(Sum))
-	r.HandleFunc("/api/v1/sumdb", RequestLogger(SumDB))
-	r.HandleFunc("/api/v1/reset", RequestLogger(Reset))
+	r.HandleFunc("/api/v1/hello", Middlerware(HelloChameleon))
+	r.HandleFunc("/api/v1/sum", Middlerware(Sum))
+	r.HandleFunc("/api/v1/sumdb", Middlerware(SumDB))
+	r.HandleFunc("/api/v1/reset", Middlerware(Reset))
 
 	s := NewServer(addr, r)
 
@@ -160,8 +165,8 @@ func Reset(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// RequestLogger logs incoming request
-func RequestLogger(f http.HandlerFunc) http.HandlerFunc {
+// Middlerware logs incoming request
+func Middlerware(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		started := time.Now()
 		log.Printf("%v | [%v] %v - %v \n", r.Proto, r.RemoteAddr, r.Method, r.RequestURI)
