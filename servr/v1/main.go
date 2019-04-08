@@ -17,7 +17,7 @@ func main() {
 
 	r := http.NewServeMux()
 
-	r.HandleFunc("/api/v1/hello", RequestLogger(HelloChameleon))
+	r.HandleFunc("/api/v1/hello", Middleware(HelloChameleon))
 
 	s := http.Server{
 		Addr:         addr,
@@ -45,8 +45,8 @@ func HelloChameleon(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// RequestLogger logs incoming request
-func RequestLogger(f http.HandlerFunc) http.HandlerFunc {
+// Middleware logs incoming request
+func Middleware(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		started := time.Now()
 		log.Printf("%v | [%v] %v - %v \n", r.Proto, r.RemoteAddr, r.Method, r.RequestURI)
