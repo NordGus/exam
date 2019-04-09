@@ -45,7 +45,7 @@ func (m Matriz) SubstractAndLog(filename string) error {
 }
 
 func main() {
-	logger := log.New(os.Stdout, "logrest ", log.LstdFlags|log.Lshortfile)
+	logger := log.New(os.Stdout, "", 0)
 	m := generateRandomMatrix()
 	err := m.SubstractAndLog("logrestfile.log")
 	if err != nil {
